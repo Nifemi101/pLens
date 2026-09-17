@@ -1,0 +1,31 @@
+import lighthouse from 'lighthouse';
+import * as chromeLauncher from 'chrome-launcher';
+
+const AUDIT_TIMEOUT_MS = 30_000;
+
+export async function runLighthouseAudit(url: string) {
+  const chrome = await chromeLauncher.launch({ chromeFlags: ['--headless'] });
+
+  try {
+    const resultPromise = lighthouse(url, {
+      logLevel: 'error',
+      output: 'json',
+      onlyCategories: ['performance'],
+      port: chrome.port,
+    });
+
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => reject(new Error('Lighthouse audit timed out')), AUDIT_TIMEOUT_MS);
+    });
+
+    const runnerResult = await Promise.race([resultPromise, timeoutPromise]);
+
+    if (!runnerResult?.lhr) {
+      throw new Error('Lighthouse returned no result');
+    }
+
+    return runnerResult.lhr;
+  } finally {
+    await chrome.kill();
+  }
+}
