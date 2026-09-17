@@ -26,6 +26,10 @@ export async function runLighthouseAudit(url: string) {
 
     return runnerResult.lhr;
   } finally {
-    await chrome.kill();
+    try {
+      await chrome.kill();
+    } catch (killError) {
+      console.error('Chrome cleanup failed (non-fatal):', killError);
+    }
   }
 }
