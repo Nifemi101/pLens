@@ -1,9 +1,11 @@
 import type { Request, Response } from 'express';
 import { validateUrl } from '../utils/validate-url.js';
 import { runLighthouseAudit } from '../services/lighthouse.service.js';
+import { extractResourceBreakdown } from '../services/resource.service.js';
+import { generateRecommendations } from '../services/recommendation.service.js';
 
 export async function analyzeController(req: Request, res: Response) {
-  const { url } = req.body;
+  const { url } = req.body ?? {};
 
   if (!url) {
     return res.status(400).json({ error: 'url is required' });
@@ -18,10 +20,14 @@ export async function analyzeController(req: Request, res: Response) {
   try {
     const lhr = await runLighthouseAudit(url);
     const score = lhr.categories.performance.score;
+    const resources = extractResourceBreakdown(lhr);
+    const recommendations = generateRecommendations(resources);
 
     return res.status(200).json({
       url: lhr.finalDisplayedUrl,
       score: score !== null ? Math.round(score * 100) : null,
+      resources,
+      recommendations,
     });
   } catch (error) {
     console.error(error);

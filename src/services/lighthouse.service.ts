@@ -1,7 +1,7 @@
 import lighthouse from 'lighthouse';
 import * as chromeLauncher from 'chrome-launcher';
 
-const AUDIT_TIMEOUT_MS = 30_000;
+const AUDIT_TIMEOUT_MS = 45_000;
 
 export async function runLighthouseAudit(url: string) {
   const chrome = await chromeLauncher.launch({ chromeFlags: ['--headless'] });
