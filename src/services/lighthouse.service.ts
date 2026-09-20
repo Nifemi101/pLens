@@ -4,7 +4,7 @@ import * as chromeLauncher from 'chrome-launcher';
 const AUDIT_TIMEOUT_MS = 45_000;
 
 export async function runLighthouseAudit(url: string) {
-  const chrome = await chromeLauncher.launch({ chromeFlags: ['--headless'] });
+  const chrome = await chromeLauncher.launch({ chromeFlags: ['--headless', '--no-sandbox', '--disable-dev-shm-usage'] });
 
   try {
     const resultPromise = lighthouse(url, {
